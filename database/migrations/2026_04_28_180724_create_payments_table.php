@@ -19,8 +19,8 @@ return new class extends Migration
             $table->integer('amount');
             $table->string('currency');
             $table->string('user_id');
-            $table->timestamp('timestamp');
             $table->string('last_event_id');
+            $table->foreign('last_event_id')->references('event_id')->on('event_logs');
         });
     }
 
