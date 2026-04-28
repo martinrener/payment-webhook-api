@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\WebhookService;
 use Illuminate\Http\JsonResponse;
+use App\DTOs\EventLogDto;
+use App\Http\Requests\StoreWebhookRequest;
 
 class WebhookController extends Controller
 {
@@ -16,6 +18,8 @@ class WebhookController extends Controller
     {
         try{
             $event = $this->createEventLogDto($request);
+            $this->webhook_service->receivePayment($event);
+            return response()->json(['message' => 'ok'], 200);
         }catch(\Exception $e){
 
         }
