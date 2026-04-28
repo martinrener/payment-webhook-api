@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Contracts\EventLogRepositoryInterface;
 
-class EventLogRepository implements EventLogRepositoryInterface 
+class EloquentEventLogRepository implements EventLogRepositoryInterface 
 {
     public function store(EventLogDto $event): void 
     {
