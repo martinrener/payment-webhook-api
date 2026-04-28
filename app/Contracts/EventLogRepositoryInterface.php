@@ -4,7 +4,7 @@ namespace App\Contracts;
 
 interface EventLogRepositoryInterface
 {
-    public function store(EventDto $event): void;
-    public function findByPaymentId(string $paymentId): array;
-    public function existsEvent(string $eventId): bool;
+    public function store(EventLogDto $event): void;
+    public function findByPaymentId(string $payment_id): array;
+    public function existsEvent(string $event_id): bool;
 }
