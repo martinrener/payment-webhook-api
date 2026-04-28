@@ -26,8 +26,9 @@ class StoreWebhookRequest extends FormRequest
             'event_id' => 'required|string',
             'payment_id' => 'required|string',
             'event' => 'required|string',
-            'amount' => 'required|integer|amount >= 0',
-            'currency' => 'required|string|currency.length() = 3',
+            'amount' => 'required|integer|min:0',
+            'currency' => 'required|alpha|size:3',
+            'timestamp' => 'required|date',
         ];
     }
 }
