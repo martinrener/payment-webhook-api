@@ -1,0 +1,9 @@
+<?php
+
+namespace App\Contracts;
+
+interface PaymentRepositoryInterface{
+    public function upsert(PaymentDto $payment): void;
+    public function findByPaymentId(string $paymentId): Payment;
+    public function list(): array;
+}
