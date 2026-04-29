@@ -17,9 +17,9 @@ class WebhookService
     public function receivePayment(EventLogDto $event): void 
     {
         $event_already_exists = $this->event_log_repo->existsEvent($event->event_id);
-        $this->event_log_repo->store($event);
         if(!$event_already_exists){
             try{
+                $this->event_log_repo->store($event);
                 $new_payment_details = $this->buildPaymentDto($event);
                 $this->payment_repo->upsert($new_payment_details);
             }catch(\Exception $e){
