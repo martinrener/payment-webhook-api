@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Contracts\PaymentRepositoryInterface;
+use App\DTOs\PaymentDto;
 
 class EloquentPaymentRepository implements PaymentRepositoryInterface 
 {
