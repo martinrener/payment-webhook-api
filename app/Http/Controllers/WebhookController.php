@@ -44,4 +44,9 @@ class WebhookController extends Controller
     {
         return response()->json($this->webhook_service->getPayments());
     }
+
+    public function getPaymentEvents(string $payment_id): JsonResponse
+    {
+        return response()->json($this->webhook_service->getPaymentEvents($payment_id));
+    }
 }
