@@ -38,4 +38,9 @@ class WebhookService
             last_event_id: $event->event_id,
         );
     }
+
+    public function getPayments(): array
+    {
+        return $this->payment_repo->list();
+    }
 }
