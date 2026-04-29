@@ -19,11 +19,11 @@
             <tbody>
                 @foreach($payments as $payment)
                     <tr>
-                        <td>{{ $payment->payment_id }}</td>
-                        <td>{{ $payment->event }}</td>
-                        <td>{{ $payment->currency }}</td>
-                        <td>{{ $payment->user_id }}</td>
-                        <td>{{ $payment->last_event_id }}</td>
+                        <td>{{ $payment[payment_id] }}</td>
+                        <td>{{ $payment[event] }}</td>
+                        <td>{{ $payment[currency] }}</td>
+                        <td>{{ $payment[user_id] }}</td>
+                        <td>{{ $payment[last_event_id] }}</td>
                     </tr>
                 @endforeach
             </tbody>
