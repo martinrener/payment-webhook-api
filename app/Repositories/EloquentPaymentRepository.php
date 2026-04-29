@@ -28,7 +28,7 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
     }
     public function list(): array
     {
-        return Payment::orderBy('payment_id')
+        return Payment::orderBy('created_at', 'desc')
             ->get()
             ->toArray();
     }
