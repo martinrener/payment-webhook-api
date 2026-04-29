@@ -43,4 +43,9 @@ class WebhookService
     {
         return $this->payment_repo->list();
     }
+
+    public function getPaymentEvents(string $payment_id): array 
+    {
+        return $this->event_log_repo->findByPaymentId($payment_id);
+    }
 }
