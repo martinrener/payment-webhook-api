@@ -79,7 +79,7 @@
                             </table>`;
                 const tbody = document.getElementById('events-tbody');
                 events.forEach(event => {
-                    tbody.innerHTML += `<tr onclick="loadEvents('${payment.payment_id}')">
+                    tbody.innerHTML += `<tr>
                         <td>${event.event_id}</td>
                         <td>${event.currency}</td>
                         <td>${event.amount}</td>
