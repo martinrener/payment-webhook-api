@@ -7,6 +7,7 @@ use App\Services\WebhookService;
 use Illuminate\Http\JsonResponse;
 use App\DTOs\EventLogDto;
 use App\Http\Requests\StoreWebhookRequest;
+use Illuminate\Support\Facades\Log;
 
 class WebhookController extends Controller
 {
@@ -16,12 +17,17 @@ class WebhookController extends Controller
 
     public function store(StoreWebhookRequest $request): JsonResponse
     {
+        Log::info('Webhook received', [
+            'event_id' => $request->event_id,
+            'payment_id' => $request->payment_id,
+            'user_id' => $request->user_id,
+        ]);
         try{
             $event = $this->createEventLogDto($request);
             $this->webhook_service->receivePayment($event);
             return response()->json(['message' => 'ok'], 200);
         }catch(\Exception $e){
-            \Log::error($e->getMessage());
+            Log::error($e->getMessage());
             return response()->json(['message' => 'error'], 500);
         }
     }
