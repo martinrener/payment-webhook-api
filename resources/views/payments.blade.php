@@ -81,8 +81,8 @@
                 events.forEach(event => {
                     tbody.innerHTML += `<tr>
                         <td>${event.event_id}</td>
+                        <td>${event.event}</td>
                         <td>${event.currency}</td>
-                        <td>${event.amount}</td>
                         <td>${event.amount}</td>
                         <td>${event.timestamp}</td>
                         <td>${event.received_at}</td>
