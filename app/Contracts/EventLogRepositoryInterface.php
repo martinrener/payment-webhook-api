@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\DTOs\EventLogDto;
+
 interface EventLogRepositoryInterface
 {
     public function store(EventLogDto $event): void;

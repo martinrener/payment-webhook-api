@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\DTOs\PaymentDto;
+
 interface PaymentRepositoryInterface
 {
     public function upsert(PaymentDto $payment): void;
