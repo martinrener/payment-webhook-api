@@ -23,7 +23,10 @@ class EloquentEventLogRepository implements EventLogRepositoryInterface
     }
     public function findByPaymentId(string $payment_id): array 
     {
-        return EventLog::where('payment_id',$payment_id)->get()->toArray();
+        return EventLog::where('payment_id',$payment_id)
+            ->orderBy('timestamp')
+            ->get()
+            ->toArray();
     }
     public function existsEvent(string $event_id): bool
     {
