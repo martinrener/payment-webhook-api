@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('event_logs', function (Blueprint $table) {
-            $table->id();
+            $table->id()->unique();
             $table->timestamps();
-            $table->string('event_id')->unique();
+            $table->string('event_id');
             $table->string('payment_id');
             $table->string('event');
             $table->integer('amount');

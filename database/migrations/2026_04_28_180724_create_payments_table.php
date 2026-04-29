@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('currency');
             $table->string('user_id');
             $table->string('last_event_id');
-            $table->foreign('last_event_id')->references('event_id')->on('event_logs');
         });
     }
 
