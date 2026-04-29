@@ -39,4 +39,9 @@ class WebhookController extends Controller
             received_at: now(),
         );
     }
+
+    public function getPayments(): JsonResponse
+    {
+        return response()->json($this->webhook_service->getPayments());
+    }
 }
