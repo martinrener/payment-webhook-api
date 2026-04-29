@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\DTOs\PaymentDto;
+use App\Models\Payment;
 
 interface PaymentRepositoryInterface
 {

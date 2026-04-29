@@ -2,8 +2,9 @@
 
 namespace App\Repositories;
 
-use App\Contracts\EventLogRepositoryInterface;
+use App\Models\EventLog;
 use App\DTOs\EventLogDto;
+use App\Contracts\EventLogRepositoryInterface;
 
 class EloquentEventLogRepository implements EventLogRepositoryInterface 
 {
