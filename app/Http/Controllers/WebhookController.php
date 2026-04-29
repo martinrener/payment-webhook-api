@@ -21,7 +21,8 @@ class WebhookController extends Controller
             $this->webhook_service->receivePayment($event);
             return response()->json(['message' => 'ok'], 200);
         }catch(\Exception $e){
-
+            \Log::error($e->getMessage());
+            return response()->json(['message' => 'error'], 500);
         }
     }
 
