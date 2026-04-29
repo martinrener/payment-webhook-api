@@ -35,6 +35,7 @@
 </html>
 
 <script>
+    let selected_payment_id  = null;
     function loadPayments() {
         fetch('/api/payments')
             .then(response => response.json())
@@ -51,13 +52,11 @@
                         <td>${payment.last_event_id}</td>
                     </tr>`;
                 });
-            });
+           });
     }
 
-    setInterval(loadPayments, 5000);
-    loadPayments();
-
     function loadEvents(payment_id) {
+        selected_payment_id = payment_id;
         fetch(`api/payments/${payment_id}/events`)
             .then(response => response.json())
             .then(events => {
@@ -91,4 +90,13 @@
             });
 
     }
+
+    function loadEventsRefresh(){
+        if(selected_payment_id) loadEvents(selected_payment_id);
+    }
+
+    setInterval(loadPayments, 5000);
+    setInterval(loadEventsRefresh, 5000);
+    loadPayments();
+
 </script>
