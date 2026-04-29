@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('event_logs', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->string('event_id')->unique();
+            $table->string('event_id');
             $table->string('payment_id');
             $table->string('event');
             $table->integer('amount');
