@@ -8,12 +8,12 @@ use App\Services\WebhookService;
 class PaymentController extends Controller
 {
     public function __construct(
-        private WebhookService $webhook_service,
+        private WebhookService $webhookService,
     ) {}
-    
+
     public function index()
     {
-        $payments = $this->webhook_service->getPayments();
+        $payments = $this->webhookService->getPayments();
         return view('payments', ['payments' => $payments]);
     }
 }

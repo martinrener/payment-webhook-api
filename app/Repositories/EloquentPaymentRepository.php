@@ -11,20 +11,20 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
     public function upsert(PaymentDto $payment): void
     {
         Payment::updateOrCreate(
-            ['payment_id' => $payment->payment_id],
+            ['payment_id' => $payment->paymentId],
             [
-                'event'       => $payment->event,
-                'amount'      => $payment->amount,
-                'currency'    => $payment->currency,
-                'user_id'     => $payment->user_id,
-                'last_event_id' => $payment->last_event_id
-            
+                'event'         => $payment->event,
+                'amount'        => $payment->amount,
+                'currency'      => $payment->currency,
+                'user_id'       => $payment->userId,
+                'last_event_id' => $payment->lastEventId,
             ]
         );
     }
-    public function findByPaymentId(string $payment_id): Payment 
+
+    public function findByPaymentId(string $paymentId): Payment
     {
-        return Payment::where('payment_id', $payment_id)->FindOrFail();
+        return Payment::where('payment_id', $paymentId)->findOrFail();
     }
     public function list(int $page = 1,int $perPage = 10): array
     {

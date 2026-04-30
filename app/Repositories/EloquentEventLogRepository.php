@@ -8,30 +8,30 @@ use App\Contracts\EventLogRepositoryInterface;
 
 class EloquentEventLogRepository implements EventLogRepositoryInterface 
 {
-    public function store(EventLogDto $event): void 
+    public function store(EventLogDto $event): void
     {
         EventLog::create([
-            'event_id'    => $event->event_id,
-            'payment_id'  => $event->payment_id,
+            'event_id'    => $event->eventId,
+            'payment_id'  => $event->paymentId,
             'event'       => $event->event,
             'amount'      => $event->amount,
             'currency'    => $event->currency,
-            'user_id'     => $event->user_id,
+            'user_id'     => $event->userId,
             'timestamp'   => $event->timestamp,
-            'received_at' => $event->received_at,
+            'received_at' => $event->receivedAt,
         ]);
     }
-    
-    public function findByPaymentId(string $payment_id): array 
+
+    public function findByPaymentId(string $paymentId): array
     {
-        return EventLog::where('payment_id',$payment_id)
+        return EventLog::where('payment_id', $paymentId)
             ->orderBy('timestamp')
             ->get()
             ->toArray();
     }
 
-    public function existsEvent(string $event_id): bool
+    public function existsEvent(string $eventId): bool
     {
-        return EventLog::where('event_id', $event_id)->exists();
+        return EventLog::where('event_id', $eventId)->exists();
     }
 }

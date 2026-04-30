@@ -11,42 +11,43 @@ use Illuminate\Support\Facades\Log;
 class WebhookService
 {
     public function __construct(
-        private EventLogRepositoryInterface $event_log_repo,
-        private PaymentRepositoryInterface $payment_repo,
+        private EventLogRepositoryInterface $eventLogRepo,
+        private PaymentRepositoryInterface $paymentRepo,
     ){}
 
-    public function receivePayment(EventLogDto $event): void 
+    public function receivePayment(EventLogDto $event): void
     {
-        $event_already_exists = $this->event_log_repo->existsEvent($event->event_id);
-        $this->event_log_repo->store($event);
-        if(!$event_already_exists){
+        $eventAlreadyExists = $this->eventLogRepo->existsEvent($event->eventId);
+        $this->eventLogRepo->store($event);
+        if(!$eventAlreadyExists){
             try{
-                $new_payment_details = $this->buildPaymentDto($event);
-                $this->payment_repo->upsert($new_payment_details);
+                $newPaymentDetails = $this->buildPaymentDto($event);
+                $this->paymentRepo->upsert($newPaymentDetails);
             }catch(\Exception $e){
                 Log::error('Error upserting payment: ' . $e->getMessage());
             }
         }
     }
+
     private function buildPaymentDto(EventLogDto $event): PaymentDto
     {
         return new PaymentDto(
-            payment_id: $event->payment_id,
+            paymentId: $event->paymentId,
             event: $event->event,
             currency: $event->currency,
             amount: $event->amount,
-            user_id: $event->user_id,
-            last_event_id: $event->event_id,
+            userId: $event->userId,
+            lastEventId: $event->eventId,
         );
     }
 
     public function getPayments(int $page = 1, int $perPage = 10): array
     {
-        return $this->payment_repo->list($page, $perPage);
+        return $this->paymentRepo->list($page, $perPage);
     }
 
-    public function getPaymentEvents(string $payment_id): array 
+    public function getPaymentEvents(string $paymentId): array
     {
-        return $this->event_log_repo->findByPaymentId($payment_id);
+        return $this->eventLogRepo->findByPaymentId($paymentId);
     }
 }

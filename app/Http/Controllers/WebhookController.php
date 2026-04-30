@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class WebhookController extends Controller
 {
     public function __construct(
-        private WebhookService $webhook_service,
+        private WebhookService $webhookService,
     ) {}
 
     public function store(StoreWebhookRequest $request): JsonResponse
@@ -24,7 +24,7 @@ class WebhookController extends Controller
         ]);
         try{
             $event = $this->createEventLogDto($request);
-            $this->webhook_service->receivePayment($event);
+            $this->webhookService->receivePayment($event);
             return response()->json(['message' => 'ok'], 200);
         }catch(\Exception $e){
             Log::error($e->getMessage());
@@ -36,14 +36,14 @@ class WebhookController extends Controller
     private function createEventLogDto(StoreWebhookRequest $request): EventLogDto
     {
         return new EventLogDto(
-            event_id: $request->event_id,
-            payment_id: $request->payment_id,
+            eventId: $request->event_id,
+            paymentId: $request->payment_id,
             event: $request->event,
             currency: strtoupper($request->currency),
             amount: $request->amount,
-            user_id: $request->user_id,
+            userId: $request->user_id,
             timestamp: $request->timestamp,
-            received_at: now(),
+            receivedAt: now(),
         );
     }
 
@@ -51,12 +51,12 @@ class WebhookController extends Controller
     {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
-        
-        return response()->json($this->webhook_service->getPayments($page, $perPage));
+
+        return response()->json($this->webhookService->getPayments($page, $perPage));
     }
 
-    public function getPaymentEvents(string $payment_id): JsonResponse
+    public function getPaymentEvents(string $paymentId): JsonResponse
     {
-        return response()->json($this->webhook_service->getPaymentEvents($payment_id));
+        return response()->json($this->webhookService->getPaymentEvents($paymentId));
     }
 }
