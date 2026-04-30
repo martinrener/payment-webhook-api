@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\WebhookService;
 use Illuminate\Http\JsonResponse;
-use App\DTOs\EventLogDto;
-use App\Http\Requests\StoreWebhookRequest;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
@@ -15,9 +13,15 @@ class AdminController extends Controller
         private WebhookService $webhookService,
     ) {}
 
-    public function refundPayment(string $paymentId): JsonResponse
+    public function refundPayment(Request $request): JsonResponse
     {
-        // Implement refund logic here, e.g. call payment gateway API to process refund
-        return response()->json(['message' => 'Refund processed'], 200);
+        $paymentId = $request->input('payment_id');
+        try {
+            $this->webhookService->refundPayment($paymentId);
+            return response()->json(['message' => 'Refund processed'], 200);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return response()->json(['message' => 'Error processing refund'], 500);
+        }
     }
 }

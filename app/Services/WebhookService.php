@@ -7,6 +7,7 @@ use App\DTOs\PaymentDto;
 use App\Contracts\EventLogRepositoryInterface;
 use App\Contracts\PaymentRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use App\Models\Payment;
 
 class WebhookService
 {
@@ -49,5 +50,31 @@ class WebhookService
     public function getPaymentEvents(string $paymentId): array
     {
         return $this->eventLogRepo->findByPaymentId($paymentId);
+    }
+
+    public function refundPayment(string $paymentId): void
+    {
+        $payment = $this->paymentRepo->findByPaymentId($paymentId);
+        if (!$payment) {
+            throw new \Exception('Payment not found');
+        }
+        $event = $this->buildEventLogDtoFromRefund($payment);
+        $this->eventLogRepo->store($event);
+        $payment = $this->buildPaymentDto($event);
+        $this->paymentRepo->upsert($payment);
+    }
+
+    private function buildEventLogDtoFromRefund(Payment $payment): EventLogDto
+    {
+        return new EventLogDto(
+            eventId: uniqid('evt_', true),
+            paymentId: $payment->payment_id,
+            event: 'payment.refunded',
+            amount: $payment->amount,
+            currency: $payment->currency,
+            userId: $payment->user_id,
+            timestamp: now()->toDateTimeString(),
+            receivedAt: now()->toDateTimeString(),
+        );
     }
 }

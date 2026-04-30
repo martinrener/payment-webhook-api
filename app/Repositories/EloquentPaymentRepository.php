@@ -24,7 +24,7 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
 
     public function findByPaymentId(string $paymentId): Payment
     {
-        return Payment::where('payment_id', $paymentId)->findOrFail();
+        return Payment::where('payment_id', $paymentId)->firstOrFail();
     }
     public function list(int $page = 1,int $perPage = 10): array
     {
