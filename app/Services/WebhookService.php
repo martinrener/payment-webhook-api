@@ -40,9 +40,9 @@ class WebhookService
         );
     }
 
-    public function getPayments(): array
+    public function getPayments(int $page = 1, int $perPage = 10): array
     {
-        return $this->payment_repo->list();
+        return $this->payment_repo->list($page, $perPage);
     }
 
     public function getPaymentEvents(string $payment_id): array 

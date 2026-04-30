@@ -7,7 +7,6 @@ use App\Http\Controllers\AuthController;
 use GuzzleHttp\Middleware;
 
 Route::post('/login',[AuthController::class,'login']); 
-Route::post('/logout',[AuthController::class,'logout'])->middleware('auth');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout',[AuthController::class,'logout']);

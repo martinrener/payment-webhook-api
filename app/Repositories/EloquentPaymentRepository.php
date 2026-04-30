@@ -26,10 +26,10 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
     {
         return Payment::where('payment_id', $payment_id)->FindOrFail();
     }
-    public function list(): array
+    public function list(int $page = 1,int $perPage = 10): array
     {
         return Payment::orderBy('created_at', 'desc')
-            ->get()
+            ->paginate($perPage, ['*'], 'page', $page)
             ->toArray();
     }
 }
