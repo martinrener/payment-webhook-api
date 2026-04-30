@@ -10,6 +10,7 @@ Route::post('/login',[AuthController::class,'login']);
 Route::post('/logout',[AuthController::class,'logout'])->middleware('auth');
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout',[AuthController::class,'logout']);
     Route::get('/user',[AuthController::class,'user']);
     Route::get('/payments',[WebhookController::class,'getPayments']);
     Route::get('/payments/{payment_id}/events',[WebhookController::class,'getPaymentEvents']);
