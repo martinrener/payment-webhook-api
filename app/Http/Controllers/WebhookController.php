@@ -32,6 +32,7 @@ class WebhookController extends Controller
         }
     }
 
+
     private function createEventLogDto(StoreWebhookRequest $request): EventLogDto
     {
         return new EventLogDto(

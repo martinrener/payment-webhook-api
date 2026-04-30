@@ -21,6 +21,7 @@ class EloquentEventLogRepository implements EventLogRepositoryInterface
             'received_at' => $event->received_at,
         ]);
     }
+    
     public function findByPaymentId(string $payment_id): array 
     {
         return EventLog::where('payment_id',$payment_id)
@@ -28,6 +29,7 @@ class EloquentEventLogRepository implements EventLogRepositoryInterface
             ->get()
             ->toArray();
     }
+
     public function existsEvent(string $event_id): bool
     {
         return EventLog::where('event_id', $event_id)->exists();
