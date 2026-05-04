@@ -9,5 +9,5 @@ interface PaymentRepositoryInterface
 {
     public function upsert(PaymentDto $payment): void;
     public function findByPaymentId(string $paymentId): Payment;
-    public function list(int $page = 1,int $perPage = 10, string $event = null, string $user_id = null, string $currency = null): array;
+    public function list(int $page = 1,int $perPage = 10, string $event = null, string $user_id = null, string $currency = null, \DateTime $dateFrom = null, \DateTime $dateTo = null): array;
 }
