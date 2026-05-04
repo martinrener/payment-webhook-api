@@ -26,7 +26,7 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
     {
         return Payment::where('payment_id', $paymentId)->firstOrFail();
     }
-    public function list(int $page = 1,int $perPage = 10, string $event = null, string $user_id = null, string $currency = null, \DateTime $dateFrom = null, \DateTime $dateTo = null): array
+    public function list(int $page = 1,int $perPage = 10, string $event = null, string $user_id = null, string $currency = null, string $dateFrom = null, string $dateTo = null): array
     {
         return Payment::when($event, function ($query) use ($event) {
                 $query->where('event', $event);
@@ -38,10 +38,10 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
                 $query->where('currency', $currency);
             })
             ->when($dateFrom, function ($query) use ($dateFrom) {
-                $query->where('created_at', '>=', $dateFrom);
+                $query->whereDate('created_at', '>=', $dateFrom);
             })
             ->when($dateTo, function ($query) use ($dateTo) {
-                $query->where('created_at', '<=', $dateTo);
+                $query->whereDate('created_at', '<=', $dateTo);
             })
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page)
