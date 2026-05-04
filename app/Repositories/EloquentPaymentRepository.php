@@ -26,9 +26,18 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
     {
         return Payment::where('payment_id', $paymentId)->firstOrFail();
     }
-    public function list(int $page = 1,int $perPage = 10): array
+    public function list(int $page = 1,int $perPage = 10, string $event = null, string $user_id = null, string $currency = null): array
     {
-        return Payment::orderBy('created_at', 'desc')
+        return Payment::when($event, function ($query) use ($event) {
+                $query->where('event', $event);
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })
+            ->when($currency, function ($query) use ($currency) {
+                $query->where('currency', $currency);
+            })
+            ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page)
             ->toArray();
     }

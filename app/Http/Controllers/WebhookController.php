@@ -51,8 +51,11 @@ class WebhookController extends Controller
     {
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
+        $event = $request->query('event');
+        $user_id = $request->query('user_id');
+        $currency = $request->query('currency');
 
-        return response()->json($this->webhookService->getPayments($page, $perPage));
+        return response()->json($this->webhookService->getPayments($page, $perPage, $event, $user_id, $currency));
     }
 
     public function getPaymentEvents(string $paymentId): JsonResponse
