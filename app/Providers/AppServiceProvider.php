@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 use App\Contracts\EventLogRepositoryInterface;
 use App\Contracts\PaymentRepositoryInterface;
 use App\Repositories\EloquentEventLogRepository;
 use App\Repositories\EloquentPaymentRepository;
+use App\Models\User;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -31,6 +33,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('is_admin', function (User $user) {
+            return $user->is_admin === true;
+        });
     }
 }

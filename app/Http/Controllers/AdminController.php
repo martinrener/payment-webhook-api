@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\WebhookService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 
 class AdminController extends Controller
 {
@@ -15,6 +16,7 @@ class AdminController extends Controller
 
     public function refundPayment(Request $request): JsonResponse
     {
+        Gate::authorize('access-admin');
         $paymentId = $request->input('payment_id');
         try {
             $this->webhookService->refundPayment($paymentId);

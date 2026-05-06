@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -16,6 +15,14 @@ class UserSeeder extends Seeder
             'name' => 'Martin',
             'email' => 'martin@test.com',
             'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'is_admin' => true,
+        ]);
+
+        \App\Models\User::create([
+            'name' => 'Matias',
+            'email' => 'matias@test.com',
+            'password' => \Illuminate\Support\Facades\Hash::make('password123'),
+            'is_admin' => false,
         ]);
     }
 }
