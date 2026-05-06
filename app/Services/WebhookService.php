@@ -7,46 +7,74 @@ use App\DTOs\PaymentDto;
 use App\Contracts\EventLogRepositoryInterface;
 use App\Contracts\PaymentRepositoryInterface;
 use Illuminate\Support\Facades\Log;
+use App\Models\Payment;
 
 class WebhookService
 {
     public function __construct(
-        private EventLogRepositoryInterface $event_log_repo,
-        private PaymentRepositoryInterface $payment_repo,
+        private EventLogRepositoryInterface $eventLogRepo,
+        private PaymentRepositoryInterface $paymentRepo,
     ){}
 
-    public function receivePayment(EventLogDto $event): void 
+    public function receivePayment(EventLogDto $event): void
     {
-        $event_already_exists = $this->event_log_repo->existsEvent($event->event_id);
-        $this->event_log_repo->store($event);
-        if(!$event_already_exists){
+        $eventAlreadyExists = $this->eventLogRepo->existsEvent($event->eventId);
+        $this->eventLogRepo->store($event);
+        if(!$eventAlreadyExists){
             try{
-                $new_payment_details = $this->buildPaymentDto($event);
-                $this->payment_repo->upsert($new_payment_details);
+                $newPaymentDetails = $this->buildPaymentDto($event);
+                $this->paymentRepo->upsert($newPaymentDetails);
             }catch(\Exception $e){
                 Log::error('Error upserting payment: ' . $e->getMessage());
             }
         }
     }
+
     private function buildPaymentDto(EventLogDto $event): PaymentDto
     {
         return new PaymentDto(
-            payment_id: $event->payment_id,
+            paymentId: $event->paymentId,
             event: $event->event,
             currency: $event->currency,
             amount: $event->amount,
-            user_id: $event->user_id,
-            last_event_id: $event->event_id,
+            userId: $event->userId,
+            lastEventId: $event->eventId,
         );
     }
 
-    public function getPayments(): array
+    public function getPayments(int $page = 1, int $perPage = 10, string $event = null, string $user_id = null, string $currency = null, string $dateFrom = null, string $dateTo = null): array
     {
-        return $this->payment_repo->list();
+        return $this->paymentRepo->list($page, $perPage, $event, $user_id, $currency, $dateFrom, $dateTo);
     }
 
-    public function getPaymentEvents(string $payment_id): array 
+    public function getPaymentEvents(string $paymentId): array
     {
-        return $this->event_log_repo->findByPaymentId($payment_id);
+        return $this->eventLogRepo->findByPaymentId($paymentId);
+    }
+
+    public function refundPayment(string $paymentId): void
+    {
+        $payment = $this->paymentRepo->findByPaymentId($paymentId);
+        if (!$payment) {
+            throw new \Exception('Payment not found');
+        }
+        $event = $this->buildEventLogDtoFromRefund($payment);
+        $this->eventLogRepo->store($event);
+        $payment = $this->buildPaymentDto($event);
+        $this->paymentRepo->upsert($payment);
+    }
+
+    private function buildEventLogDtoFromRefund(Payment $payment): EventLogDto
+    {
+        return new EventLogDto(
+            eventId: uniqid('evt_', true),
+            paymentId: $payment->payment_id,
+            event: 'payment.refunded',
+            amount: $payment->amount,
+            currency: $payment->currency,
+            userId: $payment->user_id,
+            timestamp: now()->toDateTimeString(),
+            receivedAt: now()->toDateTimeString(),
+        );
     }
 }
