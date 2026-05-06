@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\DTOs\EventLogDto;
 use App\Http\Requests\StoreWebhookRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 
 class WebhookController extends Controller
 {
@@ -49,6 +50,7 @@ class WebhookController extends Controller
 
     public function getPayments(Request $request): JsonResponse
     {
+        Gate::authorize('access-admin');
         $page = $request->query('page', 1);
         $perPage = $request->query('per_page', 10);
         $event = $request->query('event');
@@ -62,6 +64,7 @@ class WebhookController extends Controller
 
     public function getPaymentEvents(string $paymentId): JsonResponse
     {
+        Gate::authorize('access-admin');
         return response()->json($this->webhookService->getPaymentEvents($paymentId));
     }
 }
