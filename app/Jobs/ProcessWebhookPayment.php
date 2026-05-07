@@ -34,11 +34,20 @@ class ProcessWebhookPayment implements ShouldQueue
             'event_id' => $this->event->eventId,
             'payment_id' => $this->event->paymentId,
             'user_id' => $this->event->userId,
+            'queue' => $this->queue,
+            'attempts' => $this->attempts(),
         ]);
         try{
             $webhookService->receivePayment($this->event);
         }catch(\Exception $e){
-            Log::error($e->getMessage());
+            Log::error('Error processing webhook', [
+            'message' => $e->getMessage(),
+            'event_id' => $this->event->eventId,
+            'payment_id' => $this->event->paymentId,
+            'user_id' => $this->event->userId,
+            'queue' => $this->queue,
+            'attempts' => $this->attempts(),
+        ]);
             throw $e;
         }
     }
