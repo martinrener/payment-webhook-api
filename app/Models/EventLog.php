@@ -16,4 +16,5 @@ class EventLog extends Model
         'timestamp',
         'received_at',
     ];
+    public $timestamps = false;
 }
