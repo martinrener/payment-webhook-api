@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
@@ -20,6 +21,7 @@ class AuthController extends Controller
         }
 
         $token = $request->user()->createToken('auth_token')->plainTextToken;
+        // Cookie::queue('auth_token', $token, 60 * 24); // Cookie válida por 1 día
 
         return response()->json(['token' => $token], 200);
     }
