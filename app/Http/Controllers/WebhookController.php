@@ -8,7 +8,6 @@ use Illuminate\Http\JsonResponse;
 use App\DTOs\EventLogDto;
 use App\Http\Requests\StoreWebhookRequest;
 use App\Jobs\ProcessWebhookPayment;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 
 class WebhookController extends Controller

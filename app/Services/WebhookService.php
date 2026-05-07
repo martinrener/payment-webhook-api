@@ -18,16 +18,15 @@ class WebhookService
 
     public function receivePayment(EventLogDto $event): void
     {
-        $eventAlreadyExists = $this->eventLogRepo->existsEvent($event->eventId);
+        if($this->eventLogRepo->existsEvent($event->eventId)) return;
         $this->eventLogRepo->store($event);
-        if(!$eventAlreadyExists){
-            try{
-                $newPaymentDetails = $this->buildPaymentDto($event);
-                $this->paymentRepo->upsert($newPaymentDetails);
-            }catch(\Exception $e){
-                Log::error('Error upserting payment: ' . $e->getMessage());
-            }
+        try{
+            $newPaymentDetails = $this->buildPaymentDto($event);
+            $this->paymentRepo->upsert($newPaymentDetails);
+        }catch(\Exception $e){
+           Log::error('Error upserting payment: ' . $e->getMessage());
         }
+        
     }
 
     private function buildPaymentDto(EventLogDto $event): PaymentDto

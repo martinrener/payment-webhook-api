@@ -17,4 +17,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/refund', [AdminController::class, 'refundPayment']);
 });
 
-Route::post('/webhooks/payment',[WebhookController::class,'store']);
+Route::post('/webhooks/payment',[WebhookController::class,'store'])->middleware('throttle:100,1');
