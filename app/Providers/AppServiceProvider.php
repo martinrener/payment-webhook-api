@@ -9,6 +9,8 @@ use App\Contracts\PaymentRepositoryInterface;
 use App\Repositories\EloquentEventLogRepository;
 use App\Repositories\EloquentPaymentRepository;
 use App\Models\User;
+use App\Contracts\MetricsRepositoryInterface;
+use App\Repositories\EloquentMetricsRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             PaymentRepositoryInterface::class,
             EloquentPaymentRepository::class
+        );
+
+        $this->app->bind(
+            MetricsRepositoryInterface::class,
+            EloquentMetricsRepository::class
         );
     }
 
