@@ -76,4 +76,9 @@ class WebhookService
             receivedAt: now()->toDateTimeString(),
         );
     }
+
+    public function exportPayments(string $event = null, string $user_id = null, string $currency = null, string $dateFrom = null, string $dateTo = null): array
+    {
+        return $this->paymentRepo->export($event, $user_id, $currency, $dateFrom, $dateTo);
+    }
 }

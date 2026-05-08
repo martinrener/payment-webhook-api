@@ -9,6 +9,7 @@ use App\DTOs\EventLogDto;
 use App\Http\Requests\StoreWebhookRequest;
 use App\Jobs\ProcessWebhookPayment;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WebhookController extends Controller
 {
@@ -56,5 +57,26 @@ class WebhookController extends Controller
     {
         Gate::authorize('access-admin');
         return response()->json($this->webhookService->getPaymentEvents($paymentId));
+    }
+
+    public function exportPayments(Request $request): StreamedResponse
+    {
+        Gate::authorize('access-admin');
+        $event = $request->query('event');
+        $user_id = $request->query('user_id');
+        $currency = $request->query('currency');
+        $dateFrom = $request->query('date_from');
+        $dateTo = $request->query('date_to');
+
+        $data = $this->webhookService->exportPayments($event, $user_id, $currency, $dateFrom, $dateTo);
+
+        return response()->streamDownload(function () use ($data) {
+            $output = fopen('php://output', 'w');
+            fputcsv($output, ['ID', 'Event', 'Amount', 'Currency', 'User', 'Date']); // headers
+            foreach ($data as $row) {
+                fputcsv($output, [$row['payment_id'], $row['event'], $row['amount'], $row['currency'], $row['user_id'], $row['created_at']]);
+            }
+            fclose($output);
+        }, 'payments.csv');    
     }
 }

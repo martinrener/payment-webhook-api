@@ -47,4 +47,26 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
             ->paginate($perPage, ['*'], 'page', $page)
             ->toArray();
     }
+
+    public function export(string $event = null, string $user_id = null, string $currency = null, string $dateFrom = null, string $dateTo = null): array
+    {
+        return Payment::when($event, function ($query) use ($event) {
+                $query->where('event', $event);
+            })
+            ->when($user_id, function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })
+            ->when($currency, function ($query) use ($currency) {
+                $query->where('currency', $currency);
+            })
+            ->when($dateFrom, function ($query) use ($dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when($dateTo, function ($query) use ($dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
+            })
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->toArray();
+    }
 }
