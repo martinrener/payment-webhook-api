@@ -15,6 +15,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payments/{payment_id}/events',[WebhookController::class,'getPaymentEvents']);
     Route::post('/admin/refund', [AdminController::class, 'refundPayment']);
     Route::get('/metrics', [MetricsController::class, 'index']);
+    Route::get('/payments/export', [WebhookController::class, 'exportPayments']);
 });
 
 Route::post('/webhooks/payment',[WebhookController::class,'store'])->middleware('throttle:100,1');
