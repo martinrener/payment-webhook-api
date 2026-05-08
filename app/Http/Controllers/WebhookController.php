@@ -33,7 +33,7 @@ class WebhookController extends Controller
             currency: strtoupper($request->currency),
             amount: $request->amount,
             userId: $request->user_id,
-            timestamp: $request->timestamp,
+            timestamp: \Carbon\Carbon::parse($request->timestamp)->format('Y-m-d H:i:s'),
             receivedAt: now(),
         );
     }

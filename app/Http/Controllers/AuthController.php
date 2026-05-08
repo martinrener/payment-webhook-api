@@ -21,9 +21,15 @@ class AuthController extends Controller
         }
 
         $token = $request->user()->createToken('auth_token')->plainTextToken;
+        $is_admin = $request->user()->is_admin;
+        $name = $request->user()->name;
         // Cookie::queue('auth_token', $token, 60 * 24); // Cookie válida por 1 día
 
-        return response()->json(['token' => $token], 200);
+        return response()->json([
+            'token' => $token,
+            'is_admin' => $is_admin,
+            'name' => $name
+        ], 200);
     }
 
     public function logout(Request $request): JsonResponse
