@@ -7,6 +7,8 @@ use Illuminate\Foundation\Queue\Queueable;
 use App\DTOs\EventLogDto;
 use App\Services\WebhookService;
 use Illuminate\Support\Facades\Log;
+use App\Events\PaymentReceived;
+
 
 class ProcessWebhookPayment implements ShouldQueue
 {
@@ -39,6 +41,13 @@ class ProcessWebhookPayment implements ShouldQueue
         ]);
         try{
             $webhookService->receivePayment($this->event);
+            PaymentReceived::dispatch([
+                'payment_id' => $this->event->paymentId,
+                'event' => $this->event->event,
+                'amount' => $this->event->amount,
+                'currency' => $this->event->currency,
+                'user_id' => $this->event->userId,
+            ]);
         }catch(\Exception $e){
             Log::error('Error processing webhook', [
             'message' => $e->getMessage(),
