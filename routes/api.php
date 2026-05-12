@@ -19,3 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::post('/webhooks/payment',[WebhookController::class,'store'])->middleware('throttle:100,1');
+
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
