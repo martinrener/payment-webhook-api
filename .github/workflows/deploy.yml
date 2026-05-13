@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - staging
+      - dev
 
 jobs:
   deploy:
@@ -24,22 +26,126 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      # -------------------------------------------------------
+      # Resolve environment name and image tag suffix
+      # -------------------------------------------------------
+      - name: Set environment variables
+        id: env
+        run: |
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          if [ "$BRANCH" = "main" ]; then
+            echo "ENV_NAME=prod"      >> $GITHUB_OUTPUT
+            echo "SUFFIX="            >> $GITHUB_OUTPUT
+            echo "IMAGE_TAG=latest"   >> $GITHUB_OUTPUT
+          elif [ "$BRANCH" = "staging" ]; then
+            echo "ENV_NAME=staging"          >> $GITHUB_OUTPUT
+            echo "SUFFIX=-staging"           >> $GITHUB_OUTPUT
+            echo "IMAGE_TAG=staging-${{ github.sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "ENV_NAME=dev"          >> $GITHUB_OUTPUT
+            echo "SUFFIX=-dev"           >> $GITHUB_OUTPUT
+            echo "IMAGE_TAG=dev-${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+      # -------------------------------------------------------
+      # Build and push image — always tagged :latest too so
+      # prod can still pull :latest; env branches get a unique tag.
+      # -------------------------------------------------------
       - name: Build and push image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: payment-webhook-api
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ steps.env.outputs.IMAGE_TAG }}
         run: |
           docker buildx create --use
           docker buildx build --platform linux/amd64 \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             --push .
 
-      - name: Update ECS service
+      # -------------------------------------------------------
+      # Update task definitions with the new image tag
+      # -------------------------------------------------------
+      - name: Update app task definition image
+        id: app-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition${{ steps.env.outputs.SUFFIX }}.json
+          container-name: app
+          image: ${{ steps.login-ecr.outputs.registry }}/payment-webhook-api:${{ steps.env.outputs.IMAGE_TAG }}
+
+      - name: Update worker task definition image
+        id: worker-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: worker-task-definition${{ steps.env.outputs.SUFFIX }}.json
+          container-name: worker
+          image: ${{ steps.login-ecr.outputs.registry }}/payment-webhook-api:${{ steps.env.outputs.IMAGE_TAG }}
+
+      - name: Update reverb task definition image
+        id: reverb-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: reverb-task-definition${{ steps.env.outputs.SUFFIX }}.json
+          container-name: reverb
+          image: ${{ steps.login-ecr.outputs.registry }}/payment-webhook-api:${{ steps.env.outputs.IMAGE_TAG }}
+
+      # -------------------------------------------------------
+      # Deploy app service
+      # -------------------------------------------------------
+      - name: Deploy app service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.app-task-def.outputs.task-definition }}
+          service: payment-webhook-service${{ steps.env.outputs.SUFFIX }}
+          cluster: payment-webhook-cluster
+          wait-for-service-stability: true
+
+      # -------------------------------------------------------
+      # Deploy worker service
+      # -------------------------------------------------------
+      - name: Deploy worker service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.worker-task-def.outputs.task-definition }}
+          service: payment-webhook-worker${{ steps.env.outputs.SUFFIX }}
+          cluster: payment-webhook-cluster
+          wait-for-service-stability: false
+
+      # -------------------------------------------------------
+      # Deploy reverb service
+      # -------------------------------------------------------
+      - name: Deploy reverb service
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.reverb-task-def.outputs.task-definition }}
+          service: payment-webhook-reverb${{ steps.env.outputs.SUFFIX }}
+          cluster: payment-webhook-cluster
+          wait-for-service-stability: false
+
+      # -------------------------------------------------------
+      # Run migrations (only on app service, after it stabilizes)
+      # -------------------------------------------------------
+      - name: Run database migrations
+        env:
+          SUFFIX: ${{ steps.env.outputs.SUFFIX }}
         run: |
-          aws ecs update-service \
+          TASK_ARN=$(aws ecs run-task \
             --cluster payment-webhook-cluster \
-            --service payment-webhook-service \
-            --force-new-deployment \
+            --task-definition payment-webhook-app$SUFFIX \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[subnet-086805d322b514997],securityGroups=[sg-02a62b314ca7438e3],assignPublicIp=ENABLED}" \
+            --overrides '{"containerOverrides":[{"name":"app","command":["php","artisan","migrate","--force"]}]}' \
+            --region us-east-1 \
+            --query 'tasks[0].taskArn' --output text)
+          echo "Migration task: $TASK_ARN"
+          aws ecs wait tasks-stopped \
+            --cluster payment-webhook-cluster \
+            --tasks "$TASK_ARN" \
             --region us-east-1
+          EXIT=$(aws ecs describe-tasks \
+            --cluster payment-webhook-cluster \
+            --tasks "$TASK_ARN" \
+            --region us-east-1 \
+            --query 'tasks[0].containers[0].exitCode' --output text)
+          echo "Migration exit code: $EXIT"
+          [ "$EXIT" = "0" ] || exit 1
