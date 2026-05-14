@@ -22,11 +22,11 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
         );
     }
 
-    public function findByPaymentId(string $paymentId): Payment
+    public function findByPaymentId(string $paymentId): ?Payment
     {
-        return Payment::where('payment_id', $paymentId)->firstOrFail();
+        return Payment::where('payment_id', $paymentId)->first();
     }
-    public function list(int $page = 1,int $perPage = 10, string $event = null, string $user_id = null, string $currency = null, string $dateFrom = null, string $dateTo = null): array
+    public function list(int $page = 1,int $perPage = 10, ?string $event = null, ?string $user_id = null, ?string $currency = null, ?string $dateFrom = null, ?string $dateTo = null): array
     {
         return Payment::when($event, function ($query) use ($event) {
                 $query->where('event', $event);
@@ -48,7 +48,7 @@ class EloquentPaymentRepository implements PaymentRepositoryInterface
             ->toArray();
     }
 
-    public function export(string $event = null, string $user_id = null, string $currency = null, string $dateFrom = null, string $dateTo = null): array
+    public function export(?string $event = null, ?string $user_id = null, ?string $currency = null, ?string $dateFrom = null, ?string $dateTo = null): array
     {
         return Payment::when($event, function ($query) use ($event) {
                 $query->where('event', $event);
