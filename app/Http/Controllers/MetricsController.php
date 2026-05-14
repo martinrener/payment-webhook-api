@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\MetricsService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
 
 class MetricsController extends Controller
 {
@@ -12,6 +13,7 @@ class MetricsController extends Controller
     ) {}
     public function index(): JsonResponse
     {
+        Gate::authorize('access-admin');
         return response()->json($this->metricsService->getMetrics());
     }
 }

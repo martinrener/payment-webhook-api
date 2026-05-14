@@ -10,16 +10,7 @@ use App\Jobs\ProcessWebhookPayment;
 
 class WebhookEndpointTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
-    }
-
+    use RefreshDatabase;
     public function test_webhook_endpoint(): void
     {
         $payload = [

@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\EventLog;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Payment extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'payment_id',
         'event',
