@@ -81,4 +81,18 @@ class WebhookService
     {
         return $this->paymentRepo->export($event, $user_id, $currency, $dateFrom, $dateTo);
     }
+
+    public function createEventLogDto(array $data): EventLogDto
+    {
+        return new EventLogDto(
+            eventId: $data['event_id'],
+            paymentId: $data['payment_id'],
+            event: $data['event'],
+            currency: strtoupper($data['currency']),
+            amount: $data['amount'],
+            userId: $data['user_id'],
+            timestamp: \Carbon\Carbon::parse($data['timestamp'])->format('Y-m-d H:i:s'),
+            receivedAt: now(),
+        );
+    }
 }
