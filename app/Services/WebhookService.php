@@ -93,7 +93,7 @@ class WebhookService
             amount: $data['amount'],
             userId: $data['user_id'],
             timestamp: \Carbon\Carbon::parse($data['timestamp'])->format('Y-m-d H:i:s'),
-            receivedAt: now(),
+            receivedAt: now()->toDateTimeString(),
         );
     }
 }
