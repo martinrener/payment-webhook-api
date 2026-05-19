@@ -8,6 +8,7 @@ use App\Contracts\EventLogRepositoryInterface;
 use App\Contracts\PaymentRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
+use Illuminate\Support\Str;
 
 class WebhookService
 {
@@ -66,7 +67,7 @@ class WebhookService
     private function buildEventLogDtoFromRefund(Payment $payment): EventLogDto
     {
         return new EventLogDto(
-            eventId: uniqid('evt_', true),
+            eventId: 'evt_' . Str::uuid()->toString(),
             paymentId: $payment->payment_id,
             event: 'payment.refunded',
             amount: $payment->amount,
