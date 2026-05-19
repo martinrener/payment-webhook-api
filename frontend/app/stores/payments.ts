@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { paymentsApi } from '~/api/payments'
+import type { Payment, EventLog } from '~/types'
 
 export const usePaymentsStore = defineStore('payments', {
   state: () => ({
-    payments: [] as any[],
+    payments: [] as Payment[],
     currentPage: 1 as number,
     lastPage: 1 as number,
     total: 0 as number,
-    currentPaymentEvents: [] as any[],
+    currentPaymentEvents: [] as EventLog[],
     activeEvent: null as string | null,
     activeUserId: null as string | null,
     activeCurrency: null as string | null,

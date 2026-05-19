@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
 import { metricsApi } from '~/api/payments'
+import type { Metrics, PaymentsByEvent } from '~/types'
 
 export const useMetricsStore = defineStore('metrics', {
     state: () => ({
-        payments_by_event: [] as any[],
-        unique_users_count: 0 as number,
-        payments_by_currency: [] as any[],
-        volume_by_day: [] as any[],
+        payments_by_event: [] as PaymentsByEvent[],
+        unique_users_count: 0 as Metrics['unique_users_count'],
+        payments_by_currency: [] as Metrics['payments_by_currency'],
+        volume_by_day: [] as Metrics['volume_by_day'],
     }),
 
     actions: {
