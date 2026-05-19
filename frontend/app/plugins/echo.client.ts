@@ -8,7 +8,7 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
   const echo = new Echo({
     broadcaster: 'reverb',
-    key: 'kdlyfjwapt2e7ezd8bjc',
+    key: config.public.reverbKey,
     wsHost: config.public.reverbHost,
     wsPort: Number(config.public.reverbPort),
     forceTLS: false,

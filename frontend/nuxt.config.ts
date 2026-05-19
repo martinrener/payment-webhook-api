@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
+      reverbKey: process.env.REVERB_APP_KEY,
       apiBase: 'http://localhost:8000', // overridden at runtime by NUXT_PUBLIC_API_BASE env var
       reverbHost: process.env.REVERB_HOST || 'localhost',
       reverbPort: process.env.REVERB_PORT || '8080',

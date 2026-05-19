@@ -1,28 +1,32 @@
-import { defineStore } from 'pinia'
-import { metricsApi } from '~/api/payments'
+import { defineStore } from "pinia";
+import { metricsApi } from "~/api/payments";
+import type { PaymentsByEvent, PaymentsByCurrency, VolumeByDay } from "~/types";
+import { ref } from "vue";
 
-export const useMetricsStore = defineStore('metrics', {
-    state: () => ({
-        payments_by_event: [] as any[],
-        unique_users_count: 0 as number,
-        payments_by_currency: [] as any[],
-        volume_by_day: [] as any[],
-    }),
+export const useMetricsStore = defineStore("metrics", () => {
+    const payments_by_event = ref<PaymentsByEvent[]>([]);
+    const unique_users_count = ref(0);
+    const payments_by_currency = ref<PaymentsByCurrency[]>([]);
+    const volume_by_day = ref<VolumeByDay[]>([]);
 
-    actions: {
-        async fetchMetrics() {
-            try {
-                const response = await metricsApi.getMetrics()
-                const data = response.data
+    async function fetchMetrics() {
+        try {
+            const response = await metricsApi.getMetrics();
+            const data = response.data;
 
-                this.payments_by_event = data.payments_by_event
-                this.unique_users_count = data.unique_users_count
-                this.payments_by_currency = data.payments_by_currency
-                this.volume_by_day = data.volume_by_day
-            } catch (error) {
-                console.error('Error fetching metrics:', error)
-            }
+            payments_by_event.value = data.payments_by_event;
+            unique_users_count.value = data.unique_users_count;
+            payments_by_currency.value = data.payments_by_currency;
+            volume_by_day.value = data.volume_by_day;
+        } catch (error) {
+            console.error("Error fetching metrics:", error);
         }
     }
-
-})
+    return {
+        payments_by_event,
+        unique_users_count,
+        payments_by_currency,
+        volume_by_day,
+        fetchMetrics,
+    };
+});
