@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use App\Services\WebhookService;
 use Illuminate\Support\Facades\Gate;
 use App\Http\Controllers\Controller;
+use App\Services\ExportService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportPaymentsController extends Controller
 {
     public function __construct(
         private WebhookService $webhookService,
+        private ExportService $exportService,
     ) {}
 
     public function __invoke(Request $request): StreamedResponse
@@ -25,13 +27,6 @@ class ExportPaymentsController extends Controller
 
         $data = $this->webhookService->exportPayments($event, $user_id, $currency, $dateFrom, $dateTo);
 
-        return response()->streamDownload(function () use ($data) {
-            $output = fopen('php://output', 'w');
-            fputcsv($output, ['ID', 'Event', 'Amount', 'Currency', 'User', 'Date']); // headers
-            foreach ($data as $row) {
-                fputcsv($output, [$row['payment_id'], $row['event'], $row['amount'], $row['currency'], $row['user_id'], $row['created_at']]);
-            }
-            fclose($output);
-        }, 'payments.csv');    
+        return $this->exportService->exportPayments($data);
     }
 }
