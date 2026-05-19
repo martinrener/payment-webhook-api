@@ -19,22 +19,10 @@
 
     <div class="p-6">
       <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b">
-          <h2 class="text-lg font-semibold text-gray-800 mb-3">Filters</h2>
-          <div class="flex gap-3 items-center">
-            <BaseInput v-model="filterEvent" placeholder="Event Type" />
-            <BaseInput v-model="filterUserId" placeholder="User ID" />
-            <BaseInput v-model="filterCurrency" placeholder="Currency" />
-            <DateInput v-model="filterDateFrom" label="Date From" />
-            <DateInput v-model="filterDateTo" label="Date To" />
-            <button @click="applyFilters" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm font-medium">
-              Filtros
-            </button>
-            <button @click="exportCsv" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition text-sm font-medium">
-              Export CSV
-            </button>
-          </div>
-        </div>
+        <PaymentFilters 
+          @apply="applyFilters"
+          @export="handleExport"
+        />
         <PaymentsTable 
           :titles="['ID', 'Evento', 'Monto', 'Moneda', 'Usuario', 'Último Evento']" 
           :payments="paymentsStore.payments" 
@@ -48,53 +36,24 @@
         />
       </div>
     </div>
-
-    <!-- Modal refund -->
-    <div v-if="showRefundModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-        <div class="flex items-center gap-3 mb-4">
-          <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <span class="text-red-600 text-lg">⚠</span>
-          </div>
-          <h3 class="text-lg font-semibold text-gray-800">Confirmar reembolso</h3>
-        </div>
-        <p class="text-gray-500 text-sm mb-2">Estás a punto de reembolsar el pago:</p>
-        <p class="font-mono text-sm font-medium text-gray-800 bg-gray-50 rounded px-3 py-2 mb-6">{{ selectedPaymentId }}</p>
-        <p class="text-gray-400 text-xs mb-6">Esta acción no se puede deshacer.</p>
-        <div class="flex justify-end gap-3">
-          <button 
-            @click="showRefundModal = false" 
-            class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-md hover:bg-gray-50 transition"
-          >
-            Cancelar
-          </button>
-          <button 
-            @click="confirmRefund" 
-            :disabled="refundLoading"
-            class="px-4 py-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {{ refundLoading ? 'Procesando...' : 'Confirmar reembolso' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <RefundModal v-if="showRefundModal"
+      :paymentId="selectedPaymentId"
+      :loading="refundLoading"
+      @confirm="confirmRefund"
+      @cancel="showRefundModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { usePaymentsStore } from '~/stores/payments'
 import { useAuthStore } from '~/stores/auth'
-import { setAuthToken, adminApi, api } from '~/api/payments'
-import { onMounted, onUnmounted, ref } from 'vue'
-import BaseInput from '~/components/common/BaseInput.vue'
-import DateInput from '~/components/common/DateInput.vue'
+import { adminApi, api } from '~/api/payments'
+import { onMounted, ref } from 'vue'
 import PaymentsTable from '~/components/payments/table/index.vue'
+import RefundModal from '~/components/payments/RefundModal.vue'
+import PaymentFilters from '~/components/payments/PaymentFilters.vue'
 
-const filterEvent = ref(null)
-const filterUserId = ref(null)
-const filterCurrency = ref(null)
-const filterDateFrom = ref(null)
-const filterDateTo = ref(null)
 const showRefundModal = ref(false)
 const selectedPaymentId = ref(null)
 const refundLoading = ref(false)
@@ -104,9 +63,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 onMounted(async () => {
-  if (authStore.token) {
-    setAuthToken(authStore.token)
-  }
   await paymentsStore.fetchPayments(1, 10)
   
 })
@@ -123,10 +79,6 @@ async function handleLogout() {
   } finally {
     router.push('/login')
   }
-}
-
-async function applyFilters() {
-  await paymentsStore.applyFilters(filterEvent.value, filterUserId.value, filterCurrency.value, filterDateFrom.value, filterDateTo.value)
 }
 
 function handleRefund(paymentId) {
@@ -147,13 +99,17 @@ async function confirmRefund() {
   }
 }
 
-async function exportCsv() {
+async function applyFilters(event, userId, currency, dateFrom, dateTo) {
+  await paymentsStore.applyFilters(event, userId, currency, dateFrom, dateTo)
+}
+
+async function handleExport(event, userId, currency, dateFrom, dateTo) {
   const params = new URLSearchParams()
-  if (filterEvent.value) params.append('event', filterEvent.value)
-  if (filterUserId.value) params.append('user_id', filterUserId.value)
-  if (filterCurrency.value) params.append('currency', filterCurrency.value)
-  if (filterDateFrom.value) params.append('date_from', filterDateFrom.value)
-  if (filterDateTo.value) params.append('date_to', filterDateTo.value)
+  if (event) params.append('event', event)
+  if (userId) params.append('user_id', userId)
+  if (currency) params.append('currency', currency)
+  if (dateFrom) params.append('date_from', dateFrom)
+  if (dateTo) params.append('date_to', dateTo)
 
   const { data } = await api.get(`/api/payments/export?${params.toString()}`, {
     responseType: 'blob'
