@@ -29,6 +29,7 @@ class StoreWebhookRequest extends FormRequest
             'amount' => 'required|integer|min:0',
             'currency' => 'required|alpha|size:3',
             'timestamp' => 'required|date',
+            'user_id' => 'required|string',
         ];
     }
 }
