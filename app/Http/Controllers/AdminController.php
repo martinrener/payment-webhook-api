@@ -7,6 +7,7 @@ use App\Services\WebhookService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
+use App\Exceptions\PaymentNotFoundException;
 
 class AdminController extends Controller
 {
@@ -21,6 +22,8 @@ class AdminController extends Controller
         try {
             $this->webhookService->refundPayment($paymentId);
             return response()->json(['message' => 'Refund processed'], 200);
+        } catch (PaymentNotFoundException $e) {
+            return response()->json(['message' => 'Payment not found'], 404);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             return response()->json(['message' => 'Error processing refund'], 500);

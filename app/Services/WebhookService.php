@@ -9,6 +9,7 @@ use App\Contracts\PaymentRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
 use Illuminate\Support\Str;
+use App\Exceptions\PaymentNotFoundException;
 
 class WebhookService
 {
@@ -27,7 +28,6 @@ class WebhookService
         }catch(\Exception $e){
            Log::error('Error upserting payment: ' . $e->getMessage());
         }
-        
     }
 
     private function buildPaymentDto(EventLogDto $event): PaymentDto
@@ -56,7 +56,7 @@ class WebhookService
     {
         $payment = $this->paymentRepo->findByPaymentId($paymentId);
         if (!$payment) {
-            throw new \Exception('Payment not found');
+            throw new PaymentNotFoundException('Payment not found');
         }
         $event = $this->buildEventLogDtoFromRefund($payment);
         $this->eventLogRepo->store($event);
