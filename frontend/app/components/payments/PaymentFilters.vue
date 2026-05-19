@@ -25,12 +25,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import BaseInput from '../common/BaseInput.vue'
+import DateInput from '../common/DateInput.vue'
 
-const filterEvent = ref<string | null>(null)
-const filterUserId = ref<string | null>(null)
-const filterCurrency = ref<string | null>(null)
-const filterDateFrom = ref<string | null>(null)
-const filterDateTo = ref<string | null>(null)
+const filterEvent = ref<string | undefined>(undefined)
+const filterUserId = ref<string | undefined>(undefined)
+const filterCurrency = ref<string | undefined>(undefined)
+const filterDateFrom = ref<string | undefined>(undefined)
+const filterDateTo = ref<string | undefined>(undefined)
 
 const emit = defineEmits<{
   apply: [event: string | null, userId: string | null, currency: string | null, dateFrom: string | null, dateTo: string | null]
@@ -38,10 +40,10 @@ const emit = defineEmits<{
 }>()
 
 function applyFilters() {
-  emit('apply', filterEvent.value, filterUserId.value, filterCurrency.value, filterDateFrom.value, filterDateTo.value)
+  emit('apply', filterEvent.value ?? null, filterUserId.value ?? null, filterCurrency.value ?? null, filterDateFrom.value ?? null, filterDateTo.value ?? null)
 }
 
 function handleExport() {
-  emit('export', filterEvent.value, filterUserId.value, filterCurrency.value, filterDateFrom.value, filterDateTo.value)
+  emit('export', filterEvent.value ?? null, filterUserId.value ?? null, filterCurrency.value ?? null, filterDateFrom.value ?? null, filterDateTo.value ?? null)
 }
 </script>
