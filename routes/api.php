@@ -21,7 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/payments/{payment_id}/events',GetPaymentEventsController::class);
 });
 
-Route::post('/webhooks/payment',[WebhookController::class,'store'])->middleware('throttle:100,1');
+Route::post('/webhooks/payment',[WebhookController::class,'store'])->middleware(['throttle:100,1', 'verify.webhook']);
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok'], 200);
