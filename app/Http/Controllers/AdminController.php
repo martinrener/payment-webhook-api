@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Services\WebhookService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Gate;
 use App\Exceptions\PaymentNotFoundException;
+use App\Http\Requests\RefundPaymentRequest;
 
 class AdminController extends Controller
 {
@@ -15,10 +15,10 @@ class AdminController extends Controller
         private WebhookService $webhookService,
     ) {}
 
-    public function refundPayment(Request $request): JsonResponse
+    public function refundPayment(RefundPaymentRequest $request): JsonResponse
     {
         Gate::authorize('access-admin');
-        $paymentId = $request->input('payment_id');
+        $paymentId = $request->validated()['payment_id'];
         try {
             $this->webhookService->refundPayment($paymentId);
             return response()->json(['message' => 'Refund processed'], 200);
