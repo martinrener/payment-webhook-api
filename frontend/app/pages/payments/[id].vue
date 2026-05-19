@@ -21,23 +21,16 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted } from 'vue'
+<script setup lang="ts">
 import { usePaymentsStore } from '~/stores/payments'
-import { setAuthToken } from '~/api/payments'
-import { useAuthStore } from '~/stores/auth'
 import TableHead from '~/components/payments/table/TableHead.vue'
 import EventsTableBody from '~/components/events/EventsTableBody.vue'
 
 const paymentsStore = usePaymentsStore()
-const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 
 onMounted(async () => {
-  if (authStore.token) {
-    setAuthToken(authStore.token)
-  }
-  await paymentsStore.fetchPaymentEvents(route.params.id)
+  await paymentsStore.fetchPaymentEvents(route.params.id as string)
 })
 </script>

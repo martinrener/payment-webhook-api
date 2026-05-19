@@ -32,8 +32,8 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted, computed } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useMetricsStore } from '~/stores/metrics'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
@@ -43,9 +43,9 @@ definePageMeta({ middleware: 'admin' })
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const metricsStore = useMetricsStore()
-let refreshInterval = null
+let refreshInterval: ReturnType<typeof setInterval> | null = null
 
-const getColor = (index) => {
+const getColor = (index: number): string => {
   const colors = ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6', '#F97316']
   return colors[index % colors.length]
 }
@@ -90,5 +90,9 @@ onMounted(async () => {
   refreshInterval = setInterval(async () => {
     await metricsStore.fetchMetrics()
   }, 5000)
+})
+
+onUnmounted(() => {
+  if (refreshInterval) clearInterval(refreshInterval)
 })
 </script>

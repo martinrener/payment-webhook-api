@@ -37,7 +37,7 @@
       </div>
     </div>
     <RefundModal v-if="showRefundModal"
-      :paymentId="selectedPaymentId"
+      :paymentId="selectedPaymentId!"
       :loading="refundLoading"
       @confirm="confirmRefund"
       @cancel="showRefundModal = false"
@@ -45,17 +45,16 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { usePaymentsStore } from '~/stores/payments'
 import { useAuthStore } from '~/stores/auth'
 import { adminApi, api } from '~/api/payments'
-import { onMounted, ref } from 'vue'
 import PaymentsTable from '~/components/payments/table/index.vue'
 import RefundModal from '~/components/payments/RefundModal.vue'
 import PaymentFilters from '~/components/payments/PaymentFilters.vue'
 
 const showRefundModal = ref(false)
-const selectedPaymentId = ref(null)
+const selectedPaymentId = ref<string | null>(null)
 const refundLoading = ref(false)
 
 const paymentsStore = usePaymentsStore()
@@ -64,10 +63,9 @@ const router = useRouter()
 
 onMounted(async () => {
   await paymentsStore.fetchPayments(1, 10)
-  
 })
 
-async function changePage(page) {
+async function changePage(page: number) {
   await paymentsStore.fetchPayments(page, 10)
 }
 
@@ -81,7 +79,7 @@ async function handleLogout() {
   }
 }
 
-function handleRefund(paymentId) {
+function handleRefund(paymentId: string) {
   selectedPaymentId.value = paymentId
   showRefundModal.value = true
 }
@@ -89,7 +87,7 @@ function handleRefund(paymentId) {
 async function confirmRefund() {
   refundLoading.value = true
   try {
-    await adminApi.refundPayment(selectedPaymentId.value)
+    await adminApi.refundPayment(selectedPaymentId.value!)
     showRefundModal.value = false
     await paymentsStore.fetchPayments(paymentsStore.currentPage, 10)
   } catch (e) {
@@ -99,11 +97,11 @@ async function confirmRefund() {
   }
 }
 
-async function applyFilters(event, userId, currency, dateFrom, dateTo) {
+async function applyFilters(event: string | null, userId: string | null, currency: string | null, dateFrom: string | null, dateTo: string | null) {
   await paymentsStore.applyFilters(event, userId, currency, dateFrom, dateTo)
 }
 
-async function handleExport(event, userId, currency, dateFrom, dateTo) {
+async function handleExport(event: string | null, userId: string | null, currency: string | null, dateFrom: string | null, dateTo: string | null) {
   const params = new URLSearchParams()
   if (event) params.append('event', event)
   if (userId) params.append('user_id', userId)
