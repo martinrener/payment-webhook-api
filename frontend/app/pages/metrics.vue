@@ -34,15 +34,14 @@
 
 <script setup>
 import { onMounted, computed } from 'vue'
-import { useAuthStore } from '~/stores/auth'
 import { useMetricsStore } from '~/stores/metrics'
-import { setAuthToken } from '~/api/payments'
 import { Bar } from 'vue-chartjs'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js'
 
+definePageMeta({ middleware: 'admin' })
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
-const authStore = useAuthStore()
 const metricsStore = useMetricsStore()
 let refreshInterval = null
 
@@ -86,12 +85,6 @@ const volumeChartData = computed(() => {
 })
 
 onMounted(async () => {
-  if (!authStore.isAuthenticated || !authStore.isAdmin) {
-    navigateTo('/login')
-  }
-  if (authStore.token) {
-    setAuthToken(authStore.token)
-  }
   await metricsStore.fetchMetrics()
 
   refreshInterval = setInterval(async () => {
