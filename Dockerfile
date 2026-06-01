@@ -2,7 +2,7 @@
 FROM php:8.4-fpm
 
 # 2. Dependencias del sistema
-RUN apt-get update && apt-get install -y libonig-dev zip unzip git
+RUN apt-get update && apt-get install -y libonig-dev zip unzip git nginx
 
 # 3. Extensiones PHP
 RUN docker-php-ext-install pdo_mysql mbstring pcntl
@@ -11,7 +11,7 @@ RUN docker-php-ext-install pdo_mysql mbstring pcntl
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # 5. Código
-WORKDIR /var/www
+WORKDIR /var/www/html
 COPY . .
 
 # 6. Dependencias
