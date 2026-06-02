@@ -22,6 +22,8 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    volumes:
+      - .:/var/www
 
   worker:
     build: .
@@ -33,6 +35,8 @@ services:
     command: php artisan queue:work
     env_file:
       - .env
+    volumes:
+      - .:/var/www
 
   reverb:
     build: .
@@ -46,3 +50,5 @@ services:
     command: php artisan reverb:start --host=0.0.0.0
     env_file:
       - .env
+    volumes:
+      - .:/var/www
