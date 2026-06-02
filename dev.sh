@@ -31,7 +31,7 @@ cmd_down() {
 
 cmd_redeploy() {
   echo "Redeploying on GCP..."
-  ssh_gcp "git pull origin main && sudo docker-compose -f docker-compose.prod.yml up -d --build"
+  ssh_gcp "git pull origin main && sudo docker-compose -f docker-compose.prod.yml up -d"
   echo ""
   echo "Redeployed successfully."
 }
