@@ -3,12 +3,13 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GCP_HOST="35.225.178.162"
+GCP_INSTANCE="payment-webhook"
+GCP_ZONE="us-central1-a"
 GCP_USER="martin_rener"
-KEY="$SCRIPT_DIR/payment-webhook-key.pem"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 
 ssh_gcp() {
-  ssh -i "$KEY" -o StrictHostKeyChecking=no "${GCP_USER}@${GCP_HOST}" "$@"
+  gcloud compute ssh "${GCP_USER}@${GCP_INSTANCE}" --zone="${GCP_ZONE}" --command="$1"
 }
 
 cmd_up() {
