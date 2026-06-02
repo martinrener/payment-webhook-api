@@ -8,8 +8,10 @@ GCP_ZONE="us-central1-a"
 GCP_USER="martin_rener"
 FRONTEND_DIR="$SCRIPT_DIR/frontend"
 
+GCP_DIR="~/payment-webhook-api"
+
 ssh_gcp() {
-  gcloud compute ssh "${GCP_USER}@${GCP_INSTANCE}" --zone="${GCP_ZONE}" --command="$1"
+  gcloud compute ssh "${GCP_USER}@${GCP_INSTANCE}" --zone="${GCP_ZONE}" --command="cd ${GCP_DIR} && $1"
 }
 
 cmd_up() {
