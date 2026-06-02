@@ -4,416 +4,305 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Payment Webhook API</title>
-    <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet">
-    <style>
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        :root {
-            --bg:        #080b10;
-            --surface:   #0e1117;
-            --card:      #131720;
-            --border:    #1e2535;
-            --border-hi: #2a3447;
-            --text:      #e2e8f0;
-            --muted:     #64748b;
-            --subtle:    #94a3b8;
-            --green:     #10b981;
-            --blue:      #3b82f6;
-            --amber:     #f59e0b;
-            --red:       #ef4444;
-            --purple:    #8b5cf6;
-            --accent:    #6366f1;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'] }
+                }
+            }
         }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            line-height: 1.6;
-            min-height: 100vh;
-        }
-
-        /* ── Header ─────────────────────────────────────────── */
-        header {
-            background: linear-gradient(135deg, #0e1117 0%, #111827 60%, #0f172a 100%);
-            border-bottom: 1px solid var(--border);
-            padding: 48px 0 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        header::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse 800px 300px at 50% -40px, rgba(99,102,241,.18), transparent);
-            pointer-events: none;
-        }
-        .logo-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(99,102,241,.12);
-            border: 1px solid rgba(99,102,241,.25);
-            border-radius: 999px;
-            padding: 4px 14px 4px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #a5b4fc;
-            letter-spacing: .03em;
-            margin-bottom: 20px;
-        }
-        .logo-pill svg { width: 14px; height: 14px; }
-        h1 {
-            font-size: clamp(24px, 4vw, 36px);
-            font-weight: 700;
-            letter-spacing: -.02em;
-            color: #f1f5f9;
-            margin-bottom: 10px;
-        }
-        h1 span { color: var(--accent); }
-        .header-desc {
-            color: var(--subtle);
-            font-size: 15px;
-            max-width: 480px;
-            margin: 0 auto 24px;
-        }
-        .base-url {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--card);
-            border: 1px solid var(--border-hi);
-            border-radius: 10px;
-            padding: 10px 18px;
-            font-size: 13px;
-            color: var(--subtle);
-        }
-        .base-url code { color: #a5b4fc; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; }
-        .status-dot {
-            width: 7px; height: 7px;
-            background: var(--green);
-            border-radius: 50%;
-            box-shadow: 0 0 6px var(--green);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50%       { opacity: .45; }
-        }
-
-        /* ── Layout ──────────────────────────────────────────── */
-        main {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 48px 24px 80px;
-        }
-
-        /* ── Section ─────────────────────────────────────────── */
-        .section { margin-bottom: 44px; }
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
-        }
-        .section-icon {
-            width: 28px; height: 28px;
-            border-radius: 7px;
-            display: grid;
-            place-items: center;
-        }
-        .section-icon svg { width: 14px; height: 14px; }
-        .section-title {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            color: var(--subtle);
-        }
-        .section-count {
-            margin-left: auto;
-            font-size: 11px;
-            color: var(--muted);
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 1px 8px;
-        }
-
-        /* ── Endpoint Card ───────────────────────────────────── */
-        .endpoint {
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: start;
-            gap: 14px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px 18px;
-            margin-bottom: 8px;
-            transition: border-color .15s, background .15s;
-        }
-        .endpoint:hover {
-            border-color: var(--border-hi);
-            background: #161d2a;
-        }
-        .method {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .04em;
-            border-radius: 6px;
-            padding: 3px 9px;
-            min-width: 52px;
-            text-align: center;
-            align-self: center;
-        }
-        .GET    { background: rgba(59,130,246,.15);  color: #93c5fd; border: 1px solid rgba(59,130,246,.25); }
-        .POST   { background: rgba(16,185,129,.15);  color: #6ee7b7; border: 1px solid rgba(16,185,129,.25); }
-        .endpoint-path {
-            font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 13px;
-            color: #e2e8f0;
-            margin-bottom: 4px;
-            word-break: break-all;
-        }
-        .endpoint-path .param { color: #fbbf24; }
-        .endpoint-desc {
-            font-size: 13px;
-            color: var(--subtle);
-            line-height: 1.5;
-        }
-        .badges {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            align-items: flex-end;
-            align-self: center;
-        }
-        .badge {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: .04em;
-            border-radius: 5px;
-            padding: 2px 7px;
-            white-space: nowrap;
-        }
-        .badge-auth   { background: rgba(245,158,11,.12); color: #fcd34d; border: 1px solid rgba(245,158,11,.2); }
-        .badge-public { background: rgba(100,116,139,.1);  color: #94a3b8; border: 1px solid rgba(100,116,139,.2); }
-        .badge-signed { background: rgba(139,92,246,.12); color: #c4b5fd; border: 1px solid rgba(139,92,246,.2); }
-
-        /* ── Auth note ───────────────────────────────────────── */
-        .auth-note {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: rgba(99,102,241,.07);
-            border: 1px solid rgba(99,102,241,.18);
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-bottom: 32px;
-            font-size: 13px;
-            color: #a5b4fc;
-        }
-        .auth-note svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
-
-        /* ── Footer ──────────────────────────────────────────── */
-        footer {
-            text-align: center;
-            padding: 28px;
-            border-top: 1px solid var(--border);
-            color: var(--muted);
-            font-size: 12px;
-        }
-        footer a { color: var(--subtle); text-decoration: none; }
-        footer a:hover { color: var(--text); }
-
-        @media (max-width: 560px) {
-            .endpoint { grid-template-columns: auto 1fr; }
-            .badges   { flex-direction: row; align-items: center; grid-column: 1 / -1; }
-        }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
 
-<header>
-    <div class="logo-pill">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M8 1.5 L14 5v6L8 14.5 L2 11V5Z"/>
-        </svg>
-        Payment Webhook API
-    </div>
-    <h1>API <span>Reference</span></h1>
-    <p class="header-desc">REST API for payment processing, webhooks, and real-time event streaming.</p>
-    <div class="base-url">
-        <span class="status-dot"></span>
-        <span>Base URL</span>
-        <code>http://{{ request()->getHost() }}/api</code>
-    </div>
-</header>
-
-<main>
-
-    <div class="auth-note">
-        <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
-        <span>Endpoints marked <strong>🔒 Auth required</strong> need a <code style="background:rgba(255,255,255,.07);padding:1px 5px;border-radius:4px">Bearer &lt;token&gt;</code> header obtained from <code style="background:rgba(255,255,255,.07);padding:1px 5px;border-radius:4px">POST /api/login</code>.</span>
-    </div>
-
-    {{-- ── Authentication ─────────────────────────────────── --}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-icon" style="background:rgba(16,185,129,.12)">
-                <svg viewBox="0 0 20 20" fill="#6ee7b7"><path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/></svg>
+    {{-- Header --}}
+    <div class="border-b border-gray-800 bg-gray-900">
+        <div class="max-w-4xl mx-auto px-6 py-10">
+            <div class="flex items-center gap-3 mb-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow shadow-emerald-400/50 animate-pulse"></span>
+                <span class="text-xs font-medium text-emerald-400 tracking-widest uppercase">Live</span>
             </div>
-            <span class="section-title">Authentication</span>
-            <span class="section-count">3 endpoints</span>
-        </div>
-
-        <div class="endpoint">
-            <span class="method POST">POST</span>
-            <div>
-                <div class="endpoint-path">/api/login</div>
-                <div class="endpoint-desc">Authenticate with email and password. Returns a Sanctum bearer token. Rate limited to 5 attempts per 15 minutes.</div>
+            <h1 class="text-3xl font-bold text-white tracking-tight mb-2">Payment Webhook API</h1>
+            <div class="flex items-center gap-3 text-sm text-gray-400">
+                <span>Server</span>
+                <code class="bg-gray-800 text-indigo-300 px-2 py-0.5 rounded font-mono text-xs">http://35.225.178.162</code>
+                <span class="text-gray-600">·</span>
+                <code class="bg-gray-800 text-indigo-300 px-2 py-0.5 rounded font-mono text-xs">Base path: /api</code>
             </div>
-            <div class="badges"><span class="badge badge-public">Public</span></div>
-        </div>
-
-        <div class="endpoint">
-            <span class="method POST">POST</span>
-            <div>
-                <div class="endpoint-path">/api/logout</div>
-                <div class="endpoint-desc">Invalidate the current bearer token and end the session.</div>
-            </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
-        </div>
-
-        <div class="endpoint">
-            <span class="method GET">GET</span>
-            <div>
-                <div class="endpoint-path">/api/user</div>
-                <div class="endpoint-desc">Return the authenticated user's profile information.</div>
-            </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
         </div>
     </div>
 
-    {{-- ── Payments ────────────────────────────────────────── --}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-icon" style="background:rgba(59,130,246,.12)">
-                <svg viewBox="0 0 20 20" fill="#93c5fd"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"/><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"/></svg>
-            </div>
-            <span class="section-title">Payments</span>
-            <span class="section-count">3 endpoints</span>
+    <div class="max-w-4xl mx-auto px-6 py-10 space-y-10">
+
+        {{-- Auth note --}}
+        <div class="flex gap-3 bg-indigo-950/50 border border-indigo-800/50 rounded-xl p-4 text-sm text-indigo-300">
+            <svg class="w-4 h-4 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clip-rule="evenodd"/>
+            </svg>
+            <span>
+                Protected endpoints require <code class="bg-indigo-900/60 px-1.5 py-0.5 rounded font-mono text-xs">Authorization: Bearer &lt;token&gt;</code>.
+                Get a token from <code class="bg-indigo-900/60 px-1.5 py-0.5 rounded font-mono text-xs">POST /api/login</code>.
+                Admin-only endpoints also require the user to have <code class="bg-indigo-900/60 px-1.5 py-0.5 rounded font-mono text-xs">is_admin = true</code>.
+            </span>
         </div>
 
-        <div class="endpoint">
-            <span class="method GET">GET</span>
-            <div>
-                <div class="endpoint-path">/api/payments</div>
-                <div class="endpoint-desc">Paginated list of all payment records. Supports filtering by status, date range, and amount.</div>
-            </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
-        </div>
+        {{-- ── Authentication ──────────────────────────────── --}}
+        @php
+        $sections = [
+            [
+                'title' => 'Authentication',
+                'endpoints' => [
+                    [
+                        'method' => 'POST',
+                        'path' => '/api/login',
+                        'desc' => 'Authenticate with email and password. Returns a Sanctum bearer token, the user\'s name, and admin flag.',
+                        'badge' => 'public',
+                        'rate' => '5 req / 15 min',
+                        'body' => [
+                            ['name' => 'email',    'type' => 'string',  'req' => true,  'note' => 'Valid email address'],
+                            ['name' => 'password', 'type' => 'string',  'req' => true,  'note' => 'Account password'],
+                        ],
+                        'response' => '{ "token": "...", "is_admin": true, "name": "John" }',
+                    ],
+                    [
+                        'method' => 'POST',
+                        'path' => '/api/logout',
+                        'desc' => 'Invalidate the current bearer token and end the session.',
+                        'badge' => 'auth',
+                        'body' => [],
+                        'response' => '{ "message": "ok" }',
+                    ],
+                    [
+                        'method' => 'GET',
+                        'path' => '/api/user',
+                        'desc' => 'Return the authenticated user\'s profile.',
+                        'badge' => 'auth',
+                        'body' => [],
+                        'response' => '{ "id": 1, "name": "...", "email": "...", "is_admin": false }',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Payments',
+                'endpoints' => [
+                    [
+                        'method' => 'GET',
+                        'path' => '/api/payments',
+                        'desc' => 'Paginated list of all payment records with optional filters.',
+                        'badge' => 'admin',
+                        'params' => [
+                            ['name' => 'page',      'req' => false, 'note' => 'Page number (default: 1)'],
+                            ['name' => 'per_page',  'req' => false, 'note' => 'Results per page (default: 10)'],
+                            ['name' => 'event',     'req' => false, 'note' => 'Filter by event type'],
+                            ['name' => 'user_id',   'req' => false, 'note' => 'Filter by user ID'],
+                            ['name' => 'currency',  'req' => false, 'note' => 'Filter by 3-letter currency code'],
+                            ['name' => 'date_from', 'req' => false, 'note' => 'Start date (ISO 8601)'],
+                            ['name' => 'date_to',   'req' => false, 'note' => 'End date (ISO 8601)'],
+                        ],
+                        'response' => '{ "data": [...], "total": 100, "per_page": 10, "current_page": 1 }',
+                    ],
+                    [
+                        'method' => 'GET',
+                        'path' => '/api/payments/export',
+                        'desc' => 'Export payments as a downloadable CSV file. Accepts the same filters as GET /payments.',
+                        'badge' => 'admin',
+                        'params' => [
+                            ['name' => 'event',     'req' => false, 'note' => 'Filter by event type'],
+                            ['name' => 'user_id',   'req' => false, 'note' => 'Filter by user ID'],
+                            ['name' => 'currency',  'req' => false, 'note' => 'Filter by 3-letter currency code'],
+                            ['name' => 'date_from', 'req' => false, 'note' => 'Start date (ISO 8601)'],
+                            ['name' => 'date_to',   'req' => false, 'note' => 'End date (ISO 8601)'],
+                        ],
+                        'response' => 'Streams a payments.csv file',
+                    ],
+                    [
+                        'method' => 'GET',
+                        'path' => '/api/payments/{payment_id}/events',
+                        'desc' => 'Return the full event history for a specific payment. Useful for tracing status transitions and webhook delivery.',
+                        'badge' => 'admin',
+                        'body' => [],
+                        'response' => '[{ "id": 1, "event": "payment.created", "created_at": "..." }, ...]',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Webhooks',
+                'endpoints' => [
+                    [
+                        'method' => 'POST',
+                        'path' => '/api/webhooks/payment',
+                        'desc' => 'Receive an incoming payment event from an external provider. The request must include a valid HMAC signature in the X-Webhook-Signature header. Dispatches an async job to process the event.',
+                        'badge' => 'signed',
+                        'rate' => '100 req / min',
+                        'body' => [
+                            ['name' => 'event_id',   'type' => 'string',  'req' => true,  'note' => 'Unique ID for this event (idempotency key)'],
+                            ['name' => 'payment_id', 'type' => 'string',  'req' => true,  'note' => 'ID of the payment this event belongs to'],
+                            ['name' => 'event',      'type' => 'string',  'req' => true,  'note' => 'Event type, e.g. payment.created, payment.failed'],
+                            ['name' => 'amount',     'type' => 'integer', 'req' => true,  'note' => 'Amount in the smallest currency unit (e.g. cents). Min: 0'],
+                            ['name' => 'currency',   'type' => 'string',  'req' => true,  'note' => '3-letter ISO currency code (e.g. USD, ARS)'],
+                            ['name' => 'timestamp',  'type' => 'date',    'req' => true,  'note' => 'When the event occurred (ISO 8601)'],
+                            ['name' => 'user_id',    'type' => 'string',  'req' => true,  'note' => 'ID of the user associated with this payment'],
+                        ],
+                        'headers' => [
+                            ['name' => 'X-Webhook-Signature', 'note' => 'HMAC-SHA256 signature of the request body'],
+                        ],
+                        'response' => '{ "message": "ok" }',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'Admin',
+                'endpoints' => [
+                    [
+                        'method' => 'POST',
+                        'path' => '/api/admin/refund',
+                        'desc' => 'Issue a refund for a processed payment. Requires admin privileges.',
+                        'badge' => 'admin',
+                        'body' => [
+                            ['name' => 'payment_id', 'type' => 'string', 'req' => true, 'note' => 'ID of the payment to refund'],
+                        ],
+                        'response' => '{ "message": "Refund processed" }',
+                    ],
+                    [
+                        'method' => 'GET',
+                        'path' => '/api/metrics',
+                        'desc' => 'Aggregate payment metrics — total volume, success rate, failed payments, and breakdowns. Requires admin privileges.',
+                        'badge' => 'admin',
+                        'body' => [],
+                        'response' => '{ "total": 500, "success_rate": 98.4, "failed": 8, ... }',
+                    ],
+                ],
+            ],
+            [
+                'title' => 'System',
+                'endpoints' => [
+                    [
+                        'method' => 'GET',
+                        'path' => '/api/health',
+                        'desc' => 'Health check endpoint. Used by load balancers and uptime monitors.',
+                        'badge' => 'public',
+                        'body' => [],
+                        'response' => '{ "status": "ok" }',
+                    ],
+                ],
+            ],
+        ];
+        @endphp
 
-        <div class="endpoint">
-            <span class="method GET">GET</span>
-            <div>
-                <div class="endpoint-path">/api/payments/<span class="param">{payment_id}</span>/events</div>
-                <div class="endpoint-desc">Return the full event history for a specific payment — useful for debugging webhook delivery and status transitions.</div>
-            </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
-        </div>
+        @foreach($sections as $section)
+        <div>
+            <h2 class="text-xs font-semibold tracking-widest uppercase text-gray-500 mb-3">{{ $section['title'] }}</h2>
+            <div class="space-y-3">
+                @foreach($section['endpoints'] as $ep)
+                <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
 
-        <div class="endpoint">
-            <span class="method GET">GET</span>
-            <div>
-                <div class="endpoint-path">/api/payments/export</div>
-                <div class="endpoint-desc">Export the payment list as a downloadable CSV file.</div>
+                    {{-- Top row --}}
+                    <div class="flex items-start gap-3 p-4">
+                        {{-- Method badge --}}
+                        @if($ep['method'] === 'GET')
+                            <span class="shrink-0 text-xs font-bold font-mono px-2 py-1 rounded bg-blue-500/15 text-blue-300 border border-blue-500/25">GET</span>
+                        @else
+                            <span class="shrink-0 text-xs font-bold font-mono px-2 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/25">POST</span>
+                        @endif
+
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-1">
+                                <code class="text-sm font-mono text-white">{{ $ep['path'] }}</code>
+                                {{-- Auth badge --}}
+                                @if($ep['badge'] === 'auth')
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">🔒 Auth</span>
+                                @elseif($ep['badge'] === 'admin')
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/20">🔒 Admin</span>
+                                @elseif($ep['badge'] === 'signed')
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">🔐 Signed</span>
+                                @else
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-gray-700/50 text-gray-400 border border-gray-700">Public</span>
+                                @endif
+                                @if(isset($ep['rate']))
+                                    <span class="text-xs px-2 py-0.5 rounded-full bg-gray-800 text-gray-500 border border-gray-700">⏱ {{ $ep['rate'] }}</span>
+                                @endif
+                            </div>
+                            <p class="text-sm text-gray-400 leading-relaxed">{{ $ep['desc'] }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Request headers --}}
+                    @if(isset($ep['headers']) && count($ep['headers']) > 0)
+                    <div class="border-t border-gray-800 px-4 py-3">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Required Headers</p>
+                        <div class="space-y-1.5">
+                            @foreach($ep['headers'] as $h)
+                            <div class="flex items-start gap-3 text-sm">
+                                <code class="font-mono text-purple-300 text-xs shrink-0">{{ $h['name'] }}</code>
+                                <span class="text-gray-500 text-xs">{{ $h['note'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Request body --}}
+                    @if(isset($ep['body']) && count($ep['body']) > 0)
+                    <div class="border-t border-gray-800 px-4 py-3">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Request Body <span class="normal-case font-normal text-gray-600">(application/json)</span></p>
+                        <div class="space-y-1.5">
+                            @foreach($ep['body'] as $param)
+                            <div class="flex items-start gap-3 text-sm">
+                                <code class="font-mono text-indigo-300 text-xs w-28 shrink-0">{{ $param['name'] }}</code>
+                                <span class="text-gray-600 text-xs w-14 shrink-0">{{ $param['type'] }}</span>
+                                @if($param['req'])
+                                    <span class="text-rose-400 text-xs shrink-0">required</span>
+                                @else
+                                    <span class="text-gray-600 text-xs shrink-0">optional</span>
+                                @endif
+                                <span class="text-gray-500 text-xs">{{ $param['note'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Query params --}}
+                    @if(isset($ep['params']) && count($ep['params']) > 0)
+                    <div class="border-t border-gray-800 px-4 py-3">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Query Parameters</p>
+                        <div class="space-y-1.5">
+                            @foreach($ep['params'] as $param)
+                            <div class="flex items-start gap-3 text-sm">
+                                <code class="font-mono text-indigo-300 text-xs w-28 shrink-0">{{ $param['name'] }}</code>
+                                @if($param['req'])
+                                    <span class="text-rose-400 text-xs w-14 shrink-0">required</span>
+                                @else
+                                    <span class="text-gray-600 text-xs w-14 shrink-0">optional</span>
+                                @endif
+                                <span class="text-gray-500 text-xs">{{ $param['note'] }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Response --}}
+                    @if(isset($ep['response']))
+                    <div class="border-t border-gray-800 px-4 py-3 bg-gray-950/50">
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1.5">Response</p>
+                        <code class="text-xs font-mono text-gray-400">{{ $ep['response'] }}</code>
+                    </div>
+                    @endif
+
+                </div>
+                @endforeach
             </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
         </div>
+        @endforeach
+
     </div>
 
-    {{-- ── Webhooks ─────────────────────────────────────────── --}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-icon" style="background:rgba(139,92,246,.12)">
-                <svg viewBox="0 0 20 20" fill="#c4b5fd"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
-            </div>
-            <span class="section-title">Webhooks</span>
-            <span class="section-count">1 endpoint</span>
-        </div>
-
-        <div class="endpoint">
-            <span class="method POST">POST</span>
-            <div>
-                <div class="endpoint-path">/api/webhooks/payment</div>
-                <div class="endpoint-desc">Receive incoming payment events from external providers. Requests must include a valid HMAC signature in the <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;font-size:12px">X-Webhook-Signature</code> header. Rate limited to 100 requests per minute.</div>
-            </div>
-            <div class="badges"><span class="badge badge-signed">🔐 Signed</span></div>
-        </div>
-    </div>
-
-    {{-- ── Admin ────────────────────────────────────────────── --}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-icon" style="background:rgba(245,158,11,.1)">
-                <svg viewBox="0 0 20 20" fill="#fcd34d"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/></svg>
-            </div>
-            <span class="section-title">Admin</span>
-            <span class="section-count">2 endpoints</span>
-        </div>
-
-        <div class="endpoint">
-            <span class="method POST">POST</span>
-            <div>
-                <div class="endpoint-path">/api/admin/refund</div>
-                <div class="endpoint-desc">Issue a refund for a processed payment. Requires admin privileges.</div>
-            </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
-        </div>
-
-        <div class="endpoint">
-            <span class="method GET">GET</span>
-            <div>
-                <div class="endpoint-path">/api/metrics</div>
-                <div class="endpoint-desc">Aggregate metrics — total volume, success rate, failed payments, and daily breakdowns.</div>
-            </div>
-            <div class="badges"><span class="badge badge-auth">🔒 Auth required</span></div>
-        </div>
-    </div>
-
-    {{-- ── System ───────────────────────────────────────────── --}}
-    <div class="section">
-        <div class="section-header">
-            <div class="section-icon" style="background:rgba(100,116,139,.1)">
-                <svg viewBox="0 0 20 20" fill="#94a3b8"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
-            </div>
-            <span class="section-title">System</span>
-            <span class="section-count">1 endpoint</span>
-        </div>
-
-        <div class="endpoint">
-            <span class="method GET">GET</span>
-            <div>
-                <div class="endpoint-path">/api/health</div>
-                <div class="endpoint-desc">Health check — returns <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;font-size:12px">{"status":"ok"}</code>. Used by load balancers and uptime monitors.</div>
-            </div>
-            <div class="badges"><span class="badge badge-public">Public</span></div>
-        </div>
-    </div>
-
-</main>
-
-<footer>
-    <p>Payment Webhook API &nbsp;·&nbsp; Laravel {{ app()->version() }} &nbsp;·&nbsp; <a href="/api/health">Health check</a></p>
-</footer>
+    <footer class="border-t border-gray-800 mt-10 py-6 text-center text-xs text-gray-600">
+        Payment Webhook API &nbsp;·&nbsp; Laravel {{ app()->version() }}
+    </footer>
 
 </body>
 </html>
