@@ -29,7 +29,7 @@
         {"name": "REVERB_PORT", "value": "8080"},
         {"name": "CACHE_STORE", "value": "array"},
         {"name": "DB_CONNECTION", "value": "mysql"},
-        {"name": "REVERB_APP_KEY", "value": "kdlyfjwapt2e7ezd8bjc"},
+        {"name": "REVERB_APP_KEY", "value": "REPLACE_ME"},
         {"name": "REVERB_APP_SECRET", "value": "REPLACE_ME"},
         {"name": "REVERB_APP_ID", "value": "1"}
       ],
