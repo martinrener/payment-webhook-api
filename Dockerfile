@@ -11,7 +11,7 @@ RUN docker-php-ext-install pdo_mysql mbstring pcntl
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # 5. Código
-WORKDIR /var/www/html
+WORKDIR /var/www
 COPY . .
 
 # 6. Dependencias
@@ -20,10 +20,15 @@ RUN composer install --no-dev
 # 7. Permisos
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# 8. Entrypoint
+# 8. Nginx config
+COPY docker/nginx/default.conf /etc/nginx/sites-available/default
+
+# 9. Entrypoint
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-# 9. Arranque
-CMD ["php-fpm"]
+# 10. Arranque
+COPY start.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/start.sh
+CMD ["/usr/local/bin/start.sh"]

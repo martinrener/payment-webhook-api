@@ -1,0 +1,48 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: payment_webhook
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: secret
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "laravel", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    build: .
+    ports:
+      - "80:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - .env
+
+  worker:
+    build: .
+    depends_on:
+      mysql:
+        condition: service_healthy
+      app:
+        condition: service_started
+    command: php artisan queue:work
+    env_file:
+      - .env
+
+  reverb:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      app:
+        condition: service_started
+    command: php artisan reverb:start --host=0.0.0.0
+    env_file:
+      - .env
